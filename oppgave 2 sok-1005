@@ -1,0 +1,40 @@
+library(rjson)
+library(data.table)
+library(ggplot2)
+library(dplyr)
+library(zoo)
+library(readr)
+library(gglorenz)
+library(tidyr)
+library(tidyverse)
+library(jsonlite)
+library(ineq)
+
+##OPPGAVE 1
+
+# Gi inndatafilnavnet til funksjonen.
+result <- fromJSON("https://static01.nyt.com/newsgraphics/2021/12/20/us-coronavirus-deaths-2021/ff0adde21623e111d8ce103fedecf7ffc7906264/scatter.json")
+
+# Print result.
+print(result)
+
+json_data_frame <- as.data.frame(result)
+
+print(json_data_frame)
+
+json.dataframe.edit <- json_data_frame %>% 
+  select(-"geoid", -"deaths_before", -"deaths")
+
+plot(json.dataframe.edit$fully_vaccinated_pct_of_pop, json.dataframe.edit$deaths_per_100k,
+     main = "Covid-19 deaths",
+     ylab = "deaths per 100k",
+     xlab = "percentage of vaccinated people",
+     col = "red")
+## OPPGAVE 2
+json.plot <- 
+  lm(deaths_per_100k ~ 
+       fully_vaccinated_pct_of_pop, 
+     data = json.dataframe.edit)
+
+plot(json.plot)
+
