@@ -1,0 +1,54 @@
+library(tidyverse)
+library(tidyr)
+library(rvest)
+library(dplyr)
+library(janitor)
+library(ggplot2)
+library(scales)
+
+
+
+
+##Oppgave 1 
+
+RV <- "https://www.motor.no/aktuelt/motors-store-vintertest-av-rekkevidde-pa-elbiler/217132"  %>% 
+  read_html() %>% 
+  html_nodes(xpath = '/html/body/article/section/div[4]/div[4]/div[1]/table') %>%
+  html_table(header= 1, fill = TRUE) %>%
+  as.data.frame() 
+
+Rekkeviddetall <- RV [-c(19, 26), ]
+
+
+Rekkeviddetall <- RV %>% 
+  filter(!str_detect(Avvik, "x")) %>% 
+  separate(`WLTP.tall`, sep = "/", into=c("Rekkevidde", "KWH")) %>% 
+  mutate(STOPP = as.numeric(gsub("km", "", STOPP))) %>% 
+  mutate(Rekkevidde = as.numeric(gsub("km", "", Rekkevidde)))
+view (RV)
+
+Rekkeviddetall %>% 
+  ggplot(aes(x = Rekkevidde, y = STOPP)) +
+  geom_point() +
+  geom_abline(color = "red3") +
+  labs( 
+    title = "Rekkevidde tapt i kulden",
+    y = "STOPP",
+    x = "WLTP")
+ 
+
+##Oppgave 2 
+
+RV_TALL <- lm(Rekkevidde ~ STOPP, data = Rekkeviddetall)
+
+print(Rekkeviddetall)
+
+
+Rekkeviddetall %>%
+  ggplot(aes(x = Rekkevidde, y = STOPP)) +
+  geom_point() +
+  geom_smooth(method = lm) +
+  labs( 
+    title = "",
+    y = "STOPP",
+    x = "WLTP")
